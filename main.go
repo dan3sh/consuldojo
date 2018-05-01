@@ -27,13 +27,19 @@ func main() {
 			log.Fatalf("teardown: %v", err)
 		}
 	}()
+
+	s, err := c.Agent().Services()
+	if err != nil {
+		log.Fatalf("services: %v", err)
+	}
+	fmt.Println(s)
+
 	kv := c.KV()
-	got, meta, err := kv.Get("app/k1", nil)
+	got, _, err := kv.Get("app/k1", nil)
 	if err != nil {
 		log.Fatalf("get: %v", err)
 	}
-	fmt.Printf("got: %#v\n", got)
-	fmt.Printf("meta: %#v\n", meta)
+	fmt.Printf("got: %#s\n", got.Value)
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
