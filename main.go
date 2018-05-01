@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/hashicorp/consul/api"
 )
@@ -31,6 +34,10 @@ func main() {
 	}
 	fmt.Printf("got: %#v\n", got)
 	fmt.Printf("meta: %#v\n", meta)
+
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+	<-exit
 }
 
 func newClient() (*api.Client, error) {
