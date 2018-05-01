@@ -28,11 +28,34 @@ func main() {
 		}
 	}()
 
-	s, err := c.Agent().Services()
+	const (
+		serviceID   = "serviceID"
+		serviceName = "serviceName"
+	)
+
+	reg := &api.AgentServiceRegistration{
+		ID:   serviceID,
+		Name: serviceName,
+		//Port: 4242,
+	}
+	err = c.Agent().ServiceRegister(reg)
+	if err != nil {
+		log.Fatalf("register: %v", err)
+	}
+	defer func() {
+		err = c.Agent().ServiceDeregister(serviceID)
+		if err != nil {
+			log.Fatalf("unregister: %v", err)
+		}
+	}()
+
+	ss, err := c.Agent().Services()
 	if err != nil {
 		log.Fatalf("services: %v", err)
 	}
-	fmt.Println(s)
+	for _, s := range ss {
+		fmt.Printf("%#v\n", s)
+	}
 
 	kv := c.KV()
 	got, _, err := kv.Get("app/k1", nil)
