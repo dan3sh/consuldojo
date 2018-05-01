@@ -9,8 +9,7 @@ import (
 
 func main() {
 
-	config := api.DefaultConfig()
-	c, err := api.NewClient(config)
+	c, err := newClient()
 	if err != nil {
 		log.Fatalf("new client: %v", err)
 	}
@@ -35,5 +34,9 @@ func main() {
 	}
 	fmt.Printf("got: %#v\n", got)
 	fmt.Printf("meta: %#v\n", meta)
+}
 
+func newClient() (*api.Client, error) {
+	config := api.DefaultConfig()
+	return api.NewClient(config)
 }
