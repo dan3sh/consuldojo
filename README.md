@@ -9,10 +9,12 @@ go get -u github.com/dvrkps/consuldojo
 
 ## Run
 
-Start dev consul agent with web ui
 ```bash
 consul agent -dev -ui
 ```
+
+## Web UI
+http://localhost:8500/ui
 
 
 ## License
