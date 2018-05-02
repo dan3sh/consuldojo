@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/hashicorp/consul/watch"
 )
 
 func main() {
@@ -56,6 +57,26 @@ func main() {
 	for _, s := range ss {
 		fmt.Printf("%#v\n", s)
 	}
+
+	handleFunc := func(a uint64, b interface{}) {
+		fmt.Printf("%#v\n", b)
+	}
+	params := map[string]interface{}{
+		"type":   "keyprefix",
+		"prefix": defaultKeyPrefix,
+	}
+
+	plan, err := watch.Parse(params)
+	if err != nil {
+		fmt.Printf("%#v\n", plan)
+		log.Fatalf("watch parse: %v", err)
+	}
+	plan.Handler = handleFunc
+	err = plan.Run("")
+	if err != nil {
+		log.Fatalf("watch plan run: %v", err)
+	}
+	defer plan.Stop()
 
 	kv := c.KV()
 	got, _, err := kv.Get("app/k1", nil)
