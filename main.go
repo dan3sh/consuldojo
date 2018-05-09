@@ -13,7 +13,15 @@ import (
 
 func main() {
 
-	c, err := newClient()
+	const (
+		serviceID   = "serviceID"
+		serviceName = "serviceName"
+		serviceAddress = "10.10.10.10"
+		clusterServerAddress = "127.0.0.1"
+		consulPort = "8500"
+	)
+
+	c, err := newClient(clusterServerAddress, consulPort)
 	if err != nil {
 		log.Fatalf("new client: %v", err)
 	}
@@ -29,14 +37,11 @@ func main() {
 		}
 	}()
 
-	const (
-		serviceID   = "serviceID"
-		serviceName = "serviceName"
-	)
-
 	reg := &api.AgentServiceRegistration{
 		ID:   serviceID,
 		Name: serviceName,
+		Address: serviceAddress,
+
 		//Port: 4242,
 	}
 	err = c.Agent().ServiceRegister(reg)
@@ -69,7 +74,7 @@ func main() {
 		log.Fatalf("watch parse: %v", err)
 	}
 	plan.Handler = handleWatch
-	err = plan.Run("")
+	err = plan.Run(clusterServerAddress + ":" + consulPort)
 	if err != nil {
 		log.Fatalf("watch plan run: %v", err)
 	}
@@ -87,8 +92,9 @@ func main() {
 	<-exit
 }
 
-func newClient() (*api.Client, error) {
+func newClient(clusterServerAddress, consulPort string) (*api.Client, error) {
 	config := api.DefaultConfig()
+	config.Address = "http://" + clusterServerAddress + ":" + consulPort
 	return api.NewClient(config)
 }
 
