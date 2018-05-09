@@ -58,9 +58,6 @@ func main() {
 		fmt.Printf("%#v\n", s)
 	}
 
-	handleFunc := func(a uint64, b interface{}) {
-		fmt.Printf("%#v\n", b)
-	}
 	params := map[string]interface{}{
 		"type":   "keyprefix",
 		"prefix": defaultKeyPrefix,
@@ -71,7 +68,7 @@ func main() {
 		fmt.Printf("%#v\n", plan)
 		log.Fatalf("watch parse: %v", err)
 	}
-	plan.Handler = handleFunc
+	plan.Handler = handleWatch
 	err = plan.Run("")
 	if err != nil {
 		log.Fatalf("watch plan run: %v", err)
@@ -83,7 +80,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("get: %v", err)
 	}
-	fmt.Printf("got: %#s\n", got.Value)
+	fmt.Printf("got: %s\n", got.Value)
 
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
@@ -93,6 +90,16 @@ func main() {
 func newClient() (*api.Client, error) {
 	config := api.DefaultConfig()
 	return api.NewClient(config)
+}
+
+func handleWatch(idx uint64, raw interface{}) {
+	pairs, ok := raw.(api.KVPairs)
+	if !ok {
+		return
+	}
+	for _, p := range pairs {
+		fmt.Printf("key: %v, value: %s \n", p.Key, p.Value)
+	}
 }
 
 const defaultKeyPrefix = "app"
